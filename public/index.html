@@ -3,372 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cocapn — AI Chat</title>
+<meta name="description" content="Cocapn — one API key, any AI model, see what it costs. OpenAI-compatible API proxy with transparent pricing.">
+<meta property="og:title" content="Cocapn — Pay for convenience, not compute">
+<meta property="og:description" content="One API key. Any AI model. See what it costs.">
+<meta property="og:type" content="website">
+<title>Cocapn — Pay for convenience, not compute</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-  --bg: #0B1426;
-  --surface: #1E293B;
-  --border: #334155;
-  --text: #E2E8F0;
-  --dim: #94A3B8;
-  --accent: #00D4AA;
-  --accent-dim: rgba(0,212,170,0.15);
-  --user-bubble: #1E3A5F;
-  --danger: #EF4444;
-  --warn: #F59E0B;
-}
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0B1426;--sf:#1E293B;--bd:#334155;--tx:#E2E8F0;--dm:#94A3B8;--ac:#00D4AA;--ac2:rgba(0,212,170,.12)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+a{color:var(--ac);text-decoration:none}
 
-/* Header */
-.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
-.header h1 { font-size: 18px; font-weight: 600; }
-.header h1 span { color: var(--accent); }
-.header-right { display: flex; align-items: center; gap: 12px; }
-.model-select { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; }
-.model-select:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
-.spend { font-size: 12px; color: var(--dim); }
-.spend strong { color: var(--accent); font-weight: 600; }
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;background:rgba(11,20,38,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
+nav .logo{font-size:18px;font-weight:800;letter-spacing:-.5px}nav .logo span{color:var(--ac)}
+nav .links{display:flex;gap:4px}
+nav .links a{padding:8px 16px;border-radius:8px;font-size:13px;color:var(--dm);transition:.15s}
+nav .links a:hover{color:var(--tx);background:var(--ac2)}
+nav .cta{padding:8px 20px;border-radius:8px;background:var(--ac);color:var(--bg);font-size:13px;font-weight:700;border:none;cursor:pointer}
 
-/* Chat area */
-.chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-.msg { max-width: 720px; width: 100%; margin: 0 auto; animation: fadeIn 0.2s ease; }
-.msg-user { margin-left: auto; }
-.msg-user .bubble { background: var(--user-bubble); border-radius: 16px 16px 4px 16px; padding: 10px 16px; }
-.msg-assistant .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; padding: 10px 16px; white-space: pre-wrap; word-break: break-word; line-height: 1.6; }
-.msg-system { text-align: center; font-size: 12px; color: var(--dim); padding: 8px; }
-.msg-meta { font-size: 11px; color: var(--dim); margin-top: 4px; }
-.msg-assistant .msg-meta { text-align: right; }
-.msg-error .bubble { border: 1px solid var(--danger); color: var(--danger); }
+/* Hero */
+.hero{padding:140px 32px 80px;text-align:center;max-width:800px;margin:0 auto}
+.hero h1{font-size:clamp(32px,6vw,56px);font-weight:900;line-height:1.1;margin-bottom:24px;letter-spacing:-1px}
+.hero h1 em{color:var(--ac);font-style:normal}
+.hero p{font-size:19px;color:var(--dm);max-width:560px;margin:0 auto 40px;line-height:1.7}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{padding:12px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:.15s}
+.btn-primary{background:var(--ac);color:var(--bg)}.btn-primary:hover{opacity:.85;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--tx);border:1px solid var(--bd)}.btn-ghost:hover{border-color:var(--ac);color:var(--ac)}
 
-.typing { display: none; max-width: 720px; width: 100%; margin: 0 auto; }
-.typing.visible { display: block; }
-.typing .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; padding: 12px 18px; font-size: 13px; color: var(--dim); }
-.typing-dots span { animation: blink 1.4s infinite both; }
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+/* Features */
+.features{padding:0 32px 80px;max-width:900px;margin:0 auto}
+.features h2{text-align:center;font-size:14px;text-transform:uppercase;letter-spacing:2px;color:var(--dm);margin-bottom:40px}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.feat{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:28px;transition:.2s}
+.feat:hover{border-color:var(--ac);transform:translateY(-2px)}
+.feat .icon{font-size:28px;margin-bottom:12px}
+.feat h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.feat p{font-size:13px;color:var(--dm);line-height:1.6}
 
-/* Input */
-.input-area { padding: 16px 20px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
-.input-row { max-width: 720px; margin: 0 auto; display: flex; gap: 8px; }
-.input-row textarea { flex: 1; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; font-size: 14px; font-family: inherit; resize: none; max-height: 120px; line-height: 1.5; }
-.input-row textarea:focus { outline: none; border-color: var(--accent); }
-.input-row textarea::placeholder { color: var(--dim); }
-.send-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 12px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.send-btn:hover { opacity: 0.9; }
-.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Models */
+.models{padding:0 32px 80px;max-width:900px;margin:0 auto}
+.models h2{text-align:center;font-size:14px;text-transform:uppercase;letter-spacing:2px;color:var(--dm);margin-bottom:32px}
+.model-table{width:100%;border-collapse:collapse;background:var(--sf);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.model-table th{text-align:left;padding:14px 20px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dm);background:rgba(0,0,0,.2);border-bottom:1px solid var(--bd)}
+.model-table td{padding:12px 20px;font-size:14px;border-bottom:1px solid rgba(51,65,81,.5)}
+.model-table tr:last-child td{border-bottom:none}
+.model-table .provider{color:var(--dm);font-size:12px}
+.model-table .cost{color:var(--ac);font-weight:700;font-family:monospace}
+.model-table .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--ac2);color:var(--ac)}
 
-/* Welcome */
-.welcome { text-align: center; padding: 60px 20px; color: var(--dim); }
-.welcome h2 { font-size: 24px; color: var(--text); margin-bottom: 8px; }
-.welcome p { max-width: 400px; margin: 0 auto 24px; line-height: 1.6; }
-.quick-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.quick-actions button { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; }
-.quick-actions button:hover { border-color: var(--accent); color: var(--accent); }
+/* Pricing */
+.pricing{padding:0 32px 80px;max-width:900px;margin:0 auto}
+.pricing h2{text-align:center;font-size:14px;text-transform:uppercase;letter-spacing:2px;color:var(--dm);margin-bottom:40px}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
+.price-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:28px;text-align:center;position:relative}
+.price-card.featured{border-color:var(--ac);box-shadow:0 0 30px rgba(0,212,170,.1)}
+.price-card.featured::before{content:'Popular';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--ac);color:var(--bg);font-size:11px;font-weight:700;padding:2px 12px;border-radius:4px}
+.price-card h3{font-size:16px;margin-bottom:4px}
+.price-card .price{font-size:36px;font-weight:900;margin:12px 0}
+.price-card .price span{font-size:14px;font-weight:400;color:var(--dm)}
+.price-card ul{list-style:none;margin:16px 0 24px;text-align:left}
+.price-card li{font-size:13px;color:var(--dm);padding:4px 0}
+.price-card li::before{content:'✓ ';color:var(--ac)}
 
-/* Cost footer */
-.cost-bar { text-align: center; padding: 6px; font-size: 11px; color: var(--dim); background: var(--bg); border-top: 1px solid var(--border); }
-.cost-bar strong { color: var(--accent); }
+/* Code */
+.code-section{padding:0 32px 80px;max-width:900px;margin:0 auto}
+.code-section h2{text-align:center;font-size:14px;text-transform:uppercase;letter-spacing:2px;color:var(--dm);margin-bottom:32px}
+.code-block{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:24px;overflow-x:auto;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:13px;line-height:1.8}
+.code-block .comment{color:var(--dm)}
+.code-block .cmd{color:var(--ac)}
+.code-block .str{color:#F59E0B}
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+/* Footer */
+footer{text-align:center;padding:40px 32px;border-top:1px solid var(--bd);color:var(--dm);font-size:13px}
+footer a{color:var(--dm)}
+footer a:hover{color:var(--ac)}
 
-@media (max-width: 600px) {
-  .msg, .input-row, .typing, .welcome { max-width: 100%; }
-  .header { padding: 10px 14px; }
-  .chat { padding: 12px; }
+@media(max-width:600px){
+  nav{padding:0 16px}nav .links{display:none}
+  .hero{padding:120px 20px 60px}
+  .hero h1{font-size:28px}
+  .feat-grid,.price-grid{grid-template-columns:1fr}
+  .model-table{font-size:12px}.model-table th,.model-table td{padding:8px 12px}
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1><span>cocapn</span>.ai</h1>
-  <div class="header-right">
-    <select class="model-select" id="modelSelect"></select>
-    <div class="spend" id="spendDisplay"></div>
+<nav>
+  <div class="logo"><span>cocapn</span>.ai</div>
+  <div class="links">
+    <a href="#features">Features</a>
+    <a href="#models">Models</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#api">API</a>
   </div>
-</div>
+  <button class="cta" onclick="alert('Coming soon — sign up at cocapn.ai/chat')">Get Started</button>
+</nav>
 
-<div class="chat" id="chat">
-  <div class="welcome" id="welcome">
-    <h2>What can I help with?</h2>
-    <p>Chat with any AI model. Switch freely. See what it costs.</p>
-    <div class="quick-actions">
-      <button onclick="setInput('Explain quantum computing simply')">Explain quantum computing</button>
-      <button onclick="setInput('Write a Python function to sort a list')">Write a sort function</button>
-      <button onclick="setInput('What are the best practices for REST APIs?')">REST API best practices</button>
-      <button onclick="setInput('Help me debug this error: TypeError: cannot read property of undefined')">Debug a TypeError</button>
+<section class="hero">
+  <h1>One API key.<br><em>Any AI model.</em><br>See what it costs.</h1>
+  <p>Drop-in replacement for OpenAI's API. Switch between DeepSeek, Gemini, GPT, and Claude without changing your code. Transparent pricing, always.</p>
+  <div class="hero-btns">
+    <a href="#pricing" class="btn btn-primary">Get started free</a>
+    <a href="#api" class="btn btn-ghost">View API docs</a>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <h2>Why Cocapn</h2>
+  <div class="feat-grid">
+    <div class="feat">
+      <div class="icon">💰</div>
+      <h3>Transparent Cost</h3>
+      <p>Every response includes exact provider cost. No markup games. No hidden fees. You always know what you're spending.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">🔄</div>
+      <h3>8 Models, 4 Providers</h3>
+      <p>DeepSeek, Gemini, GPT-4o, Claude — pick the best model for each task. Switch anytime with one line of code.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">🔌</div>
+      <h3>OpenAI-Compatible</h3>
+      <p>Change the base URL, keep your code. Works with every OpenAI SDK, library, and integration out of the box.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">🔑</div>
+      <h3>Bring Your Own Keys</h3>
+      <p>Add your own provider API keys. They're stored encrypted and never shared. Your keys, your control.</p>
     </div>
   </div>
-  <div class="typing" id="typing">
-    <div class="bubble"><span class="typing-dots"><span>●</span> <span>●</span> <span>●</span></span></div>
+</section>
+
+<section class="models" id="models">
+  <h2>Supported Models</h2>
+  <table class="model-table">
+    <thead><tr><th>Model</th><th>Provider</th><th>Cost per 1M tokens (in / out)</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge">CHEAPEST</span> DeepSeek V3</td><td class="provider">DeepSeek</td><td class="cost">$0.14 / $0.28</td></tr>
+      <tr><td>DeepSeek R1</td><td class="provider">DeepSeek</td><td class="cost">$0.55 / $2.19</td></tr>
+      <tr><td><span class="badge">FAST</span> Gemini 2.5 Flash</td><td class="provider">Google</td><td class="cost">$0.15 / $0.60</td></tr>
+      <tr><td>Gemini 2.5 Pro</td><td class="provider">Google</td><td class="cost">$1.25 / $10.00</td></tr>
+      <tr><td>GPT-4o Mini</td><td class="provider">OpenAI</td><td class="cost">$0.15 / $0.60</td></tr>
+      <tr><td>GPT-4o</td><td class="provider">OpenAI</td><td class="cost">$2.50 / $10.00</td></tr>
+      <tr><td>Claude 3.5 Haiku</td><td class="provider">Anthropic</td><td class="cost">$0.80 / $4.00</td></tr>
+      <tr><td>Claude 3.5 Sonnet</td><td class="provider">Anthropic</td><td class="cost">$3.00 / $15.00</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="pricing" id="pricing">
+  <h2>Pricing</h2>
+  <div class="price-grid">
+    <div class="price-card">
+      <h3>Free</h3>
+      <div class="price">$0<span>/mo</span></div>
+      <ul>
+        <li>50 requests/day</li>
+        <li>20% cost-plus margin</li>
+        <li>All models available</li>
+        <li>BYOK supported</li>
+      </ul>
+      <a href="#" class="btn btn-ghost" style="width:100%" onclick="alert('Coming soon')">Get started</a>
+    </div>
+    <div class="price-card featured">
+      <h3>Standard</h3>
+      <div class="price">$5<span>/mo</span></div>
+      <ul>
+        <li>5,000 requests/day</li>
+        <li>2% cost-plus margin</li>
+        <li>Priority queue</li>
+        <li>Usage analytics</li>
+        <li>No ads</li>
+      </ul>
+      <a href="#" class="btn btn-primary" style="width:100%" onclick="alert('Coming soon')">Sign up</a>
+    </div>
+    <div class="price-card">
+      <h3>Gold</h3>
+      <div class="price">$15<span>/mo</span></div>
+      <ul>
+        <li>Unlimited requests</li>
+        <li>At cost (0% margin)</li>
+        <li>Docker containers</li>
+        <li>Webhook integrations</li>
+        <li>Advanced analytics</li>
+      </ul>
+      <a href="#" class="btn btn-ghost" style="width:100%" onclick="alert('Coming soon')">Sign up</a>
+    </div>
+    <div class="price-card">
+      <h3>Enterprise</h3>
+      <div class="price">$50<span>/seat/mo</span></div>
+      <ul>
+        <li>Custom domains</li>
+        <li>99.9% SLA</li>
+        <li>SSO/SAML</li>
+        <li>Audit logs</li>
+        <li>24hr support</li>
+      </ul>
+      <a href="#" class="btn btn-ghost" style="width:100%" onclick="alert('Coming soon')">Contact sales</a>
+    </div>
   </div>
-</div>
+</section>
 
-<div class="input-area">
-  <div class="input-row">
-    <textarea id="userInput" rows="1" placeholder="Message cocapn.ai..." onkeydown="handleKey(event)"></textarea>
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+<section class="code-section" id="api">
+  <h2>API — One line change</h2>
+  <div class="code-block">
+<span class="comment"># Replace OpenAI's base URL with Cocapn</span><br>
+<span class="comment"># Everything else stays the same</span><br><br>
+<span class="comment"># Python</span><br>
+openai.base_url = <span class="str">"https://cocapn.ai/v1"</span><br>
+openai.api_key = <span class="str">"cocapn_your_key_here"</span><br>
+response = openai.chat.completions.create(<br>
+&nbsp;&nbsp;model=<span class="str">"deepseek-chat"</span>,<br>
+&nbsp;&nbsp;messages=[{"role":"user","content":"Hello!"}]<br>
+)<br><br>
+<span class="comment"># cURL</span><br>
+<span class="cmd">curl</span> https://cocapn.ai/v1/chat/completions \\<br>
+&nbsp;&nbsp;-H <span class="str">"Authorization: Bearer cocapn_your_key"</span> \\<br>
+&nbsp;&nbsp;-H <span class="str">"Content-Type: application/json"</span> \\<br>
+&nbsp;&nbsp;-d <span class="str">'{"model":"deepseek-chat","messages":[...]}'</span><br><br>
+<span class="comment"># Response includes cost headers:</span><br>
+<span class="comment"># X-Cocapn-Cost: 0.000042</span><br>
+<span class="comment"># X-Cocapn-Model: deepseek-chat</span><br>
+<span class="comment"># X-Cocapn-Tokens: 15,47</span>
   </div>
-</div>
+</section>
 
-<div class="cost-bar" id="costBar">
-  Raw cost: <strong>$0.000</strong> &nbsp;|&nbsp; Cocapn margin: <strong>$0.000</strong> &nbsp;|&nbsp; Tokens: <strong>0</strong>
-</div>
+<footer>
+  <p>&copy; 2026 Cocapn. Pay for convenience, not compute.</p>
+  <p style="margin-top:8px"><a href="https://github.com/Lucineer/cocapn-chat">Open source</a> · <a href="mailto:casey@cocapn.ai">Contact</a></p>
+</footer>
 
-<script>
-// Models — these are the ones that actually work and are cheap
-const MODELS = [
-  { id: 'deepseek-chat', name: 'DeepSeek V3', provider: 'DeepSeek', costIn: 0.14, costOut: 0.28, desc: 'Best value, smart' },
-  { id: 'deepseek-reasoner', name: 'DeepSeek R1', provider: 'DeepSeek', costIn: 0.55, costOut: 2.19, desc: 'Deep reasoning' },
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google', costIn: 0.15, costOut: 0.60, desc: 'Fast, multimodal' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'Google', costIn: 1.25, costOut: 10.00, desc: 'Most capable' },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', costIn: 0.15, costOut: 0.60, desc: 'Reliable, cheap' },
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', costIn: 2.50, costOut: 10.00, desc: 'Strong all-around' },
-  { id: 'claude-3-5-haiku', name: 'Claude 3.5 Haiku', provider: 'Anthropic', costIn: 0.80, costOut: 4.00, desc: 'Fast Claude' },
-  { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', costIn: 3.00, costOut: 15.00, desc: 'Best Claude' },
-];
-
-let messages = [];
-let totalCostRaw = 0;
-let totalTokensIn = 0;
-let totalTokensOut = 0;
-let currentModel = MODELS[0];
-
-// Populate model selector
-const sel = document.getElementById('modelSelect');
-MODELS.forEach((m, i) => {
-  const opt = document.createElement('option');
-  opt.value = i;
-  opt.textContent = `${m.name} ($${m.costIn}/M in)`;
-  sel.appendChild(opt);
-});
-sel.addEventListener('change', () => { currentModel = MODELS[sel.value]; });
-
-// Auto-resize textarea
-const textarea = document.getElementById('userInput');
-textarea.addEventListener('input', () => {
-  textarea.style.height = 'auto';
-  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-});
-
-function setInput(text) {
-  textarea.value = text;
-  textarea.focus();
-}
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-function addMessage(role, content, meta = '') {
-  const chat = document.getElementById('chat');
-  const typing = document.getElementById('typing');
-  const welcome = document.getElementById('welcome');
-  if (welcome) welcome.style.display = 'none';
-
-  const div = document.createElement('div');
-  div.className = `msg msg-${role}`;
-  div.innerHTML = `<div class="bubble">${escapeHtml(content)}</div>${meta ? `<div class="msg-meta">${meta}</div>` : ''}`;
-  chat.insertBefore(div, typing);
-  chat.scrollTop = chat.scrollHeight;
-  return div;
-}
-
-function escapeHtml(text) {
-  const d = document.createElement('div');
-  d.textContent = text;
-  return d.innerHTML;
-}
-
-function showTyping(show) {
-  document.getElementById('typing').classList.toggle('visible', show);
-  const chat = document.getElementById('chat');
-  if (show) chat.scrollTop = chat.scrollHeight;
-}
-
-function updateCostBar() {
-  const marginRate = 0.02; // 2% for standard tier
-  const margin = totalCostRaw * marginRate;
-  document.getElementById('costBar').innerHTML =
-    `Raw cost: <strong>$${totalCostRaw.toFixed(4)}</strong> &nbsp;|&nbsp; ` +
-    `Cocapn margin: <strong>$${margin.toFixed(4)}</strong> &nbsp;|&nbsp; ` +
-    `Tokens: <strong>${totalTokensIn.toLocaleString()} in / ${totalTokensOut.toLocaleString()} out</strong>`;
-}
-
-async function sendMessage() {
-  const text = textarea.value.trim();
-  if (!text) return;
-
-  textarea.value = '';
-  textarea.style.height = 'auto';
-  document.getElementById('sendBtn').disabled = true;
-
-  messages.push({ role: 'user', content: text });
-  addMessage('user', text);
-  showTyping(true);
-
-  try {
-    // Try the Cocapn proxy first, fall back to direct API
-    let response;
-    const useProxy = true; // Would be false if no proxy available
-
-    if (useProxy) {
-      // Direct to provider — in production this goes through cocapn.ai proxy
-      // For now, we need an API key. The user provides theirs.
-      response = await callProvider(currentModel, messages);
-    }
-
-    showTyping(false);
-    const assistantText = response.content;
-    messages.push({ role: 'assistant', content: assistantText });
-
-    // Calculate cost
-    const costIn = (response.tokensIn / 1_000_000) * currentModel.costIn;
-    const costOut = (response.tokensOut / 1_000_000) * currentModel.costOut;
-    totalCostRaw += costIn + costOut;
-    totalTokensIn += response.tokensIn;
-    totalTokensOut += response.tokensOut;
-    updateCostBar();
-
-    const meta = `${currentModel.name} · ${response.tokensIn + response.tokensOut} tokens · $${(costIn + costOut).toFixed(4)}`;
-    addMessage('assistant', assistantText, meta);
-
-  } catch (err) {
-    showTyping(false);
-    addMessage('error', `Error: ${err.message}`);
-    // Remove failed user message from history
-    messages.pop();
-  }
-
-  document.getElementById('sendBtn').disabled = false;
-  textarea.focus();
-}
-
-async function callProvider(model, msgs) {
-  // In production: POST to cocapn.ai/v1/chat/completions
-  // For now: try direct DeepSeek (free tier available) or show setup prompt
-
-  const API_KEYS = {
-    'DeepSeek': localStorage.getItem('cocapn_key_deepseek') || '',
-    'Google': localStorage.getItem('cocapn_key_google') || '',
-    'OpenAI': localStorage.getItem('cocapn_key_openai') || '',
-    'Anthropic': localStorage.getItem('cocapn_key_anthropic') || '',
-  };
-
-  let key = API_KEYS[model.provider];
-  if (!key) {
-    key = prompt(`Enter your ${model.provider} API key.\n\nIt stays in your browser — Cocapn never sees it.\n\nGet one at:\n${getKeyUrl(model.provider)}`);
-    if (key) {
-      localStorage.setItem(`cocapn_key_${model.provider.toLowerCase()}`, key);
-      API_KEYS[model.provider] = key;
-    }
-  }
-
-  if (!key) throw new Error('No API key provided');
-
-  // Provider-specific endpoints and formats
-  if (model.provider === 'Anthropic') {
-    // Anthropic uses a different format
-    const anthropicMsgs = msgs.filter(m => m.role !== 'system').map(m => ({
-      role: m.role,
-      content: m.content
-    }));
-
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: model.id,
-        max_tokens: 4096,
-        messages: anthropicMsgs
-      })
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || `Anthropic ${resp.status}`);
-    }
-
-    const data = await resp.json();
-    return {
-      content: data.content[0].text,
-      tokensIn: data.usage.input_tokens,
-      tokensOut: data.usage.output_tokens
-    };
-
-  } else {
-    // OpenAI-compatible (DeepSeek, Google via OpenAI format, OpenAI)
-    const baseUrl = model.provider === 'DeepSeek'
-      ? 'https://api.deepseek.com'
-      : model.provider === 'Google'
-        ? 'https://generativelanguage.googleapis.com/v1beta/openai'
-        : 'https://api.openai.com';
-
-    const resp = await fetch(`${baseUrl}/v1/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`
-      },
-      body: JSON.stringify({
-        model: model.id,
-        messages: msgs,
-        max_tokens: 4096,
-        stream: false
-      })
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || `${model.provider} ${resp.status}`);
-    }
-
-    const data = await resp.json();
-    return {
-      content: data.choices[0].message.content,
-      tokensIn: data.usage.prompt_tokens,
-      tokensOut: data.usage.completion_tokens
-    };
-  }
-}
-
-function getKeyUrl(provider) {
-  const urls = {
-    'DeepSeek': 'https://platform.deepseek.com/api_keys',
-    'Google': 'https://aistudio.google.com/apikey',
-    'OpenAI': 'https://platform.openai.com/api-keys',
-    'Anthropic': 'https://console.anthropic.com/settings/keys'
-  };
-  return urls[provider] || '';
-}
-
-// Keyboard shortcut: Ctrl+/ to clear chat
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.key === '/') {
-    e.preventDefault();
-    if (confirm('Clear chat history?')) {
-      messages = [];
-      totalCostRaw = 0;
-      totalTokensIn = 0;
-      totalTokensOut = 0;
-      const chat = document.getElementById('chat');
-      chat.innerHTML = '';
-      // Re-add typing indicator
-      chat.innerHTML = '<div class="typing" id="typing"><div class="bubble"><span class="typing-dots"><span>●</span> <span>●</span> <span>●</span></span></div></div>';
-      updateCostBar();
-    }
-  }
-});
-</script>
 </body>
 </html>
