@@ -1,0 +1,12 @@
+name = "cocapn-chat"
+main = "cocapn-proxy-worker.js"
+compatibility_date = "2024-12-01"
+
+# Environment variables (set via Cloudflare dashboard, not here)
+# DEEPSEEK_API_KEY = ""
+# GOOGLE_API_KEY = ""
+# OPENAI_API_KEY = ""
+# ANTHROPIC_API_KEY = ""
+
+[vars]
+ENVIRONMENT = "production"
