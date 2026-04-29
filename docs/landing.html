@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cocapn.ai — One API for Every AI Model</title>
+    <meta name="description" content="Smart AI model routing with real-time cost tracking. OpenAI-compatible API for DeepSeek, Claude, GPT-4o, Llama, Gemini. 60-97% cost savings.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #050508; --surface: #0c0c14; --surface2: #141420;
+            --border: #1a1a2e; --text: #eeeef2; --text-dim: #7878a0;
+            --accent: #7c6aff; --accent2: #9d8aff;
+            --green: #4ade80; --red: #ff6b6b; --blue: #60a5fa;
+            --gradient: linear-gradient(135deg, #7c6aff 0%, #ff6b6b 100%);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+        /* Hero */
+        .hero { padding: 6rem 2rem 4rem; text-align: center; position: relative; }
+        .hero::before { content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(124,106,255,0.08) 0%, transparent 70%); pointer-events: none; }
+        .hero-badge { display: inline-block; padding: 0.3rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; font-size: 0.82rem; color: var(--text-dim); margin-bottom: 1.5rem; }
+        .hero h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+        .hero h1 .gradient { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; color: var(--text-dim); max-width: 600px; margin: 0 auto 2rem; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 0.7rem 1.8rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+        .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Stats bar */
+        .stats { display: flex; justify-content: center; gap: 3rem; padding: 2rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .stat { text-align: center; }
+        .stat .number { font-size: 2rem; font-weight: 700; }
+        .stat .label { font-size: 0.82rem; color: var(--text-dim); }
+
+        /* Sections */
+        .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .section h2 { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 0.75rem; }
+        .section .subtitle { text-align: center; color: var(--text-dim); margin-bottom: 3rem; font-size: 1.05rem; }
+
+        /* Features */
+        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .feature { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem; transition: border-color 0.3s; }
+        .feature:hover { border-color: var(--accent); }
+        .feature .icon { font-size: 2rem; margin-bottom: 0.75rem; }
+        .feature h3 { font-size: 1.05rem; margin-bottom: 0.5rem; }
+        .feature p { font-size: 0.88rem; color: var(--text-dim); }
+
+        /* Model grid */
+        .model-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .model-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; transition: all 0.2s; }
+        .model-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+        .model-card .name { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; }
+        .model-card .provider { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+        .model-card .price { font-size: 0.82rem; color: var(--green); }
+
+        /* Savings */
+        .savings { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; display: flex; gap: 3rem; align-items: center; }
+        .savings-big { text-align: center; }
+        .savings-big .number { font-size: 4rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .savings-big .label { font-size: 0.95rem; color: var(--text-dim); }
+        .savings-table { flex: 1; }
+        .savings-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+        .savings-row:last-child { border: none; }
+        .savings-row .task { color: var(--text-dim); }
+        .savings-row .before { color: var(--red); text-decoration: line-through; }
+        .savings-row .after { color: var(--green); font-weight: 600; }
+
+        /* Code block */
+        .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 2rem 0; }
+        .code-header { display: flex; align-items: center; padding: 0.75rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border); gap: 0.5rem; }
+        .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .code-dot.red { background: #ff5f57; }
+        .code-dot.yellow { background: #ffbd2e; }
+        .code-dot.green { background: #28c840; }
+        .code-block pre { padding: 1.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.7; overflow-x: auto; }
+        .code-block code { color: var(--text-dim); }
+        .code-block .kw { color: var(--accent); }
+        .code-block .str { color: var(--green); }
+        .code-block .comment { color: #555; }
+
+        /* Pricing */
+        .pricing { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+        .price-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; position: relative; }
+        .price-card.popular { border-color: var(--accent); }
+        .price-card.popular::before { content: 'Most Popular'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 0.2rem 1rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .price-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .price-card .amount { font-size: 2.5rem; font-weight: 700; }
+        .price-card .amount span { font-size: 0.9rem; font-weight: 400; color: var(--text-dim); }
+        .price-card ul { list-style: none; margin: 1.5rem 0; text-align: left; }
+        .price-card li { font-size: 0.85rem; color: var(--text-dim); padding: 0.3rem 0; }
+        .price-card li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+
+        /* Footer */
+        .footer { padding: 3rem 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--text-dim); font-size: 0.85rem; }
+        .footer a { color: var(--accent); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .features { grid-template-columns: 1fr; }
+            .model-grid { grid-template-columns: 1fr 1fr; }
+            .pricing { grid-template-columns: 1fr 1fr; }
+            .savings { flex-direction: column; }
+            .stats { flex-direction: column; gap: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-badge">⚡ Now with Smart Routing — 72% average cost savings</div>
+        <h1>One API for<br><span class="gradient">Every AI Model</span></h1>
+        <p>DeepSeek, Claude, GPT-4o, Llama, Gemini — all through a single OpenAI-compatible endpoint. Smart routing picks the cheapest capable model automatically.</p>
+        <div class="hero-buttons">
+            <a href="https://cocapn.ai/docs" class="btn btn-primary">Get Started Free →</a>
+            <a href="https://github.com/Lucineer/cocapn-chat" class="btn btn-secondary">GitHub</a>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat"><div class="number">8</div><div class="label">AI Models</div></div>
+        <div class="stat"><div class="number">72%</div><div class="label">Avg Cost Savings</div></div>
+        <div class="stat"><div class="number">200K</div><div class="label">Max Context</div></div>
+        <div class="stat"><div class="number">50ms</div><div class="label">Avg Routing Latency</div></div>
+    </div>
+
+    <div class="section">
+        <h2>Why cocapn?</h2>
+        <p class="subtitle">Stop juggling API keys. One endpoint, every model.</p>
+        <div class="features">
+            <div class="feature">
+                <div class="icon">🧠</div>
+                <h3>Smart Routing</h3>
+                <p>Classifies your request and picks the cheapest capable model. Simple chats go to DeepSeek ($0.14/1M), complex reasoning to Claude or GPT-4o.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">💰</div>
+                <h3>Real-Time Cost Tracking</h3>
+                <p>See exactly what each request costs. Per-model breakdowns, daily/weekly/monthly views. Never get surprised by an API bill again.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🔑</div>
+                <h3>Bring Your Own Keys</h3>
+                <p>Add your own provider API keys. They're used first, server keys as fallback. Keys stored in Cloudflare Secrets — never in code.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🔌</div>
+                <h3>OpenAI-Compatible</h3>
+                <p>Drop-in replacement. Change the base URL, keep your code. Works with any OpenAI SDK, LangChain, or custom integration.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">⚡</div>
+                <h3>Global Edge Network</h3>
+                <p>Built on Cloudflare Workers. Runs in 300+ cities worldwide. Sub-50ms routing latency. 99.99% uptime SLA on paid plans.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">📦</div>
+                <h3>SDKs for Every Language</h3>
+                <p>npm install cocapn, pip install cocapn, go get cocapn-go. Full TypeScript definitions included.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Available Models</h2>
+        <p class="subtitle">From budget-friendly to cutting-edge — pick your price point.</p>
+        <div class="model-grid">
+            <div class="model-card">
+                <div class="name">DeepSeek Chat</div>
+                <div class="provider">DeepSeek</div>
+                <div class="price">$0.14 / $0.28 per 1M</div>
+            </div>
+            <div class="model-card">
+                <div class="name">DeepSeek Reasoner</div>
+                <div class="provider">DeepSeek</div>
+                <div class="price">$0.55 / $2.19 per 1M</div>
+            </div>
+            <div class="model-card">
+                <div class="name">GPT-4o</div>
+                <div class="provider">OpenAI</div>
+                <div class="price">$2.50 / $10.00 per 1M</div>
+            </div>
+            <div class="model-card">
+                <div class="name">GPT-4o Mini</div>
+                <div class="provider">OpenAI</div>
+                <div class="price">$0.15 / $0.60 per 1M</div>
+            </div>
+            <div class="model-card">
+                <div class="name">Claude Sonnet 4</div>
+                <div class="provider">Anthropic</div>
+                <div class="price">$3.00 / $15.00 per 1M</div>
+            </div>
+            <div class="model-card">
+                <div class="name">Claude Haiku 4</div>
+                <div class="provider">Anthropic</div>
+                <div class="price">$0.80 / $4.00 per 1M</div>
+            </div>
+            <div class="model-card">
+                <div class="name">Llama 4 Maverick</div>
+                <div class="provider">Meta</div>
+                <div class="price">$0.20 / $0.60 per 1M</div>
+            </div>
+            <div class="model-card">
+                <div class="name">Gemini 2.5 Flash</div>
+                <div class="provider">Google</div>
+                <div class="price">$0.15 / $0.60 per 1M</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Smart Routing Savings</h2>
+        <p class="subtitle">Stop overpaying for simple tasks.</p>
+        <div class="savings">
+            <div class="savings-big">
+                <div class="number">72%</div>
+                <div class="label">Average Cost<br>Reduction</div>
+            </div>
+            <div class="savings-table">
+                <div class="savings-row"><span class="task">Simple Chat</span><span class="before">$2.50/$10.00</span><span class="after">$0.14/$0.28</span></div>
+                <div class="savings-row"><span class="task">Code Review</span><span class="before">$2.50/$10.00</span><span class="after">$0.80/$4.00</span></div>
+                <div class="savings-row"><span class="task">Math & Reasoning</span><span class="before">$2.50/$10.00</span><span class="after">$0.55/$2.19</span></div>
+                <div class="savings-row"><span class="task">Data Analysis</span><span class="before">$2.50/$10.00</span><span class="after">$0.20/$0.60</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Get Started in 30 Seconds</h2>
+        <p class="subtitle">Works with any language. Here's Node.js:</p>
+        <div class="code-block">
+            <div class="code-header">
+                <div class="code-dot red"></div>
+                <div class="code-dot yellow"></div>
+                <div class="code-dot green"></div>
+                <span style="margin-left: 0.5rem; font-size: 0.8rem; color: var(--text-dim);">terminal</span>
+            </div>
+            <pre><code><span class="comment">$ npm install cocapn</span>
+
+<span class="kw">import</span> { chat } <span class="kw">from</span> <span class="str">'cocapn'</span>;
+
+<span class="kw">const</span> response = <span class="kw">await</span> chat({
+  apiKey: <span class="str">'cpn_your_key'</span>,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello!'</span> }],
+});
+
+console.log(response.content);  <span class="comment">// AI response</span>
+console.log(response.costUsd);   <span class="comment">// $0.0000042</span></code></pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Simple Pricing</h2>
+        <p class="subtitle">Start free. Scale when you're ready.</p>
+        <div class="pricing">
+            <div class="price-card">
+                <h3>Free</h3>
+                <div class="amount">$0<span>/mo</span></div>
+                <ul>
+                    <li>100K tokens/day</li>
+                    <li>3 models</li>
+                    <li>Community support</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" style="width:100%;display:block;text-align:center;">Get Started</a>
+            </div>
+            <div class="price-card popular">
+                <h3>Builder</h3>
+                <div class="amount">$9<span>/mo</span></div>
+                <ul>
+                    <li>1M tokens/day</li>
+                    <li>8 models</li>
+                    <li>BYOK support</li>
+                    <li>Smart routing</li>
+                    <li>Priority queue</li>
+                </ul>
+                <a href="#" class="btn btn-primary" style="width:100%;display:block;text-align:center;">Start Free Trial</a>
+            </div>
+            <div class="price-card">
+                <h3>Team</h3>
+                <div class="amount">$29<span>/mo</span></div>
+                <ul>
+                    <li>5M tokens/day</li>
+                    <li>All models</li>
+                    <li>Team dashboard</li>
+                    <li>Webhooks</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" style="width:100%;display:block;text-align:center;">Get Started</a>
+            </div>
+            <div class="price-card">
+                <h3>Enterprise</h3>
+                <div class="amount">Custom</div>
+                <ul>
+                    <li>Unlimited tokens</li>
+                    <li>SLA guarantee</li>
+                    <li>On-prem option</li>
+                    <li>SSO/SAML</li>
+                    <li>Dedicated support</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" style="width:100%;display:block;text-align:center;">Contact Us</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>⚡ <a href="https://cocapn.ai">cocapn.ai</a> — Built on Cloudflare Workers. OpenAI-compatible API for every model.</p>
+        <p style="margin-top: 0.5rem;">© 2026 cocapn. MIT License. <a href="https://github.com/Lucineer/cocapn-chat">GitHub</a></p>
+    </div>
+</body>
+</html>

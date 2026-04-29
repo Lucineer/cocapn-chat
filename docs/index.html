@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cocapn.ai — Docs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --border: #1e1e2e;
+            --text: #e0e0e8;
+            --text-dim: #8888a0;
+            --accent: #7c6aff;
+            --accent2: #ff6b6b;
+            --green: #4ade80;
+            --blue: #60a5fa;
+            --yellow: #fbbf24;
+            --code-bg: #1a1a28;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10,10,15,0.9); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        nav .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+        nav .links { display: flex; gap: 1.5rem; }
+        nav a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        nav a:hover { color: var(--text); }
+        .sidebar {
+            position: fixed; top: 56px; left: 0; bottom: 0; width: 260px;
+            background: var(--surface); border-right: 1px solid var(--border);
+            padding: 1.5rem 0; overflow-y: auto;
+        }
+        .sidebar a {
+            display: block; padding: 0.4rem 1.5rem; color: var(--text-dim);
+            text-decoration: none; font-size: 0.88rem; transition: all 0.15s;
+        }
+        .sidebar a:hover, .sidebar a.active { color: var(--text); background: rgba(124,106,255,0.1); }
+        .sidebar .section { padding: 0.5rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.05em; margin-top: 1rem; }
+        .content {
+            margin-left: 260px; margin-top: 56px; padding: 2.5rem 3rem; max-width: 900px;
+        }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 700; }
+        h2 { font-size: 1.5rem; margin: 2rem 0 0.75rem; color: var(--accent); font-weight: 600; }
+        h3 { font-size: 1.15rem; margin: 1.5rem 0 0.5rem; font-weight: 600; }
+        p { margin-bottom: 1rem; color: var(--text-dim); }
+        pre {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0 1.5rem;
+            overflow-x: auto; font-size: 0.85rem; line-height: 1.6;
+        }
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85em;
+        }
+        :not(pre) > code {
+            background: var(--code-bg); padding: 0.15em 0.4em;
+            border-radius: 4px; color: var(--accent);
+        }
+        .endpoint {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0;
+        }
+        .method {
+            display: inline-block; padding: 0.15em 0.5em; border-radius: 4px;
+            font-weight: 700; font-size: 0.8rem; margin-right: 0.5rem;
+        }
+        .method.post { background: #2d1f0f; color: var(--yellow); }
+        .method.get { background: #0f2d1f; color: var(--green); }
+        .method.delete { background: #2d0f0f; color: var(--accent2); }
+        .badge {
+            display: inline-block; padding: 0.15em 0.5em; border-radius: 4px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .badge.required { background: #2d0f1f; color: #ff8fa3; }
+        .badge.optional { background: #0f1f2d; color: #8fafff; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+        th { color: var(--text-dim); font-weight: 600; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 1.25rem;
+        }
+        .card h4 { margin-bottom: 0.5rem; }
+        .card p { font-size: 0.85rem; margin-bottom: 0; }
+        .quickstart-steps { counter-reset: step; }
+        .quickstart-steps > div {
+            counter-increment: step; padding: 1rem; margin: 0.75rem 0;
+            background: var(--surface); border-radius: 8px; border-left: 3px solid var(--accent);
+            position: relative; padding-left: 3rem;
+        }
+        .quickstart-steps > div::before {
+            content: counter(step); position: absolute; left: 1rem; top: 1rem;
+            width: 1.5rem; height: 1.5rem; background: var(--accent);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem; color: #fff;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .content { margin-left: 0; padding: 1.5rem; }
+            .grid { grid-template-columns: 1fr; }
+        }
+        .copy-btn {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            background: var(--border); border: none; color: var(--text-dim);
+            padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem;
+        }
+        pre { position: relative; }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="logo">⚡ cocapn.ai</div>
+    <div class="links">
+        <a href="https://cocapn.ai">Home</a>
+        <a href="https://cocapn.ai/docs">Docs</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://github.com/Lucineer/cocapn-chat">GitHub</a>
+    </div>
+</nav>
+
+<div class="sidebar">
+    <div class="section">Getting Started</div>
+    <a href="#quickstart">Quick Start</a>
+    <a href="#installation">Installation</a>
+    <a href="#models">Models</a>
+
+    <div class="section">API Reference</div>
+    <a href="#chat">Chat Completions</a>
+    <a href="#streaming">Streaming</a>
+    <a href="#models-api">List Models</a>
+    <a href="#usage">Usage Stats</a>
+
+    <div class="section">BYOK</div>
+    <a href="#byok">Bring Your Own Keys</a>
+    <a href="#routing">Smart Routing</a>
+
+    <div class="section">SDKs</div>
+    <a href="#sdk-node">Node.js</a>
+    <a href="#sdk-python">Python</a>
+    <a href="#sdk-go">Go</a>
+
+    <div class="section">Info</div>
+    <a href="#pricing">Pricing</a>
+    <a href="#errors">Error Codes</a>
+    <a href="#rate-limits">Rate Limits</a>
+</div>
+
+<div class="content">
+    <h1 id="quickstart">⚡ cocapn.ai Docs</h1>
+    <p>One API for every AI model. Smart routing, real-time cost tracking, BYOK support. OpenAI-compatible.</p>
+
+    <h2 id="installation">Quick Start</h2>
+    <div class="quickstart-steps">
+        <div>
+            <strong>Get your API key</strong>
+            <p>Sign up at <a href="https://cocapn.ai" style="color:var(--accent)">cocapn.ai</a> and grab your key from the dashboard.</p>
+        </div>
+        <div>
+            <strong>Install an SDK</strong>
+            <pre><code>npm install cocapn       # Node.js
+pip install cocapn       # Python
+go get cocapn-go         # Go</code></pre>
+        </div>
+        <div>
+            <strong>Start chatting</strong>
+            <pre><code>import { chat } from 'cocapn';
+
+const response = await chat({
+  apiKey: 'cpn_your_key_here',
+  messages: [{ role: 'user', content: 'Hello!' }]
+});
+
+console.log(response.content);</code></pre>
+        </div>
+    </div>
+
+    <h2 id="models">Available Models</h2>
+    <table>
+        <tr><th>Model</th><th>Provider</th><th>Input ($/1M)</th><th>Output ($/1M)</th><th>Context</th></tr>
+        <tr><td><code>deepseek-chat</code></td><td>DeepSeek</td><td>$0.14</td><td>$0.28</td><td>128K</td></tr>
+        <tr><td><code>deepseek-reasoner</code></td><td>DeepSeek</td><td>$0.55</td><td>$2.19</td><td>128K</td></tr>
+        <tr><td><code>claude-sonnet-4-20250514</code></td><td>Anthropic</td><td>$3.00</td><td>$15.00</td><td>200K</td></tr>
+        <tr><td><code>claude-haiku-4-20250414</code></td><td>Anthropic</td><td>$0.80</td><td>$4.00</td><td>200K</td></tr>
+        <tr><td><code>gpt-4o</code></td><td>OpenAI</td><td>$2.50</td><td>$10.00</td><td>128K</td></tr>
+        <tr><td><code>gpt-4o-mini</code></td><td>OpenAI</td><td>$0.15</td><td>$0.60</td><td>128K</td></tr>
+        <tr><td><code>llama-4-maverick</code></td><td>Meta</td><td>$0.20</td><td>$0.60</td><td>128K</td></tr>
+        <tr><td><code>gemini-2.5-flash</code></td><td>Google</td><td>$0.15</td><td>$0.60</td><td>1M</td></tr>
+    </table>
+
+    <h2 id="chat">Chat Completions</h2>
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>https://cocapn.ai/v1/chat/completions</code>
+    </div>
+    <p>OpenAI-compatible chat completions endpoint. Drop-in replacement for any OpenAI SDK.</p>
+
+    <h3>Request Body</h3>
+    <table>
+        <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        <tr><td><code>model</code> <span class="badge required">required</span></td><td>string</td><td>Model ID (e.g., "deepseek-chat")</td></tr>
+        <tr><td><code>messages</code> <span class="badge required">required</span></td><td>array</td><td>Chat messages with role/content</td></tr>
+        <tr><td><code>stream</code> <span class="badge optional">optional</span></td><td>boolean</td><td>Enable streaming (default: false)</td></tr>
+        <tr><td><code>temperature</code> <span class="badge optional">optional</span></td><td>number</td><td>Sampling temperature (0-2, default: 1)</td></tr>
+        <tr><td><code>max_tokens</code> <span class="badge optional">optional</span></td><td>integer</td><td>Max tokens to generate</td></tr>
+        <tr><td><code>system</code> <span class="badge optional">optional</span></td><td>string</td><td>System prompt (alternative to system message)</td></tr>
+    </table>
+
+    <h3>Example</h3>
+    <pre><code>curl https://cocapn.ai/v1/chat/completions \
+  -H "Authorization: Bearer cpn_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "deepseek-chat",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is the capital of France?"}
+    ],
+    "temperature": 0.7
+  }'</code></pre>
+
+    <h3>Response</h3>
+    <pre><code>{
+  "id": "chat-cpn-abc123",
+  "object": "chat.completion",
+  "model": "deepseek-chat",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "The capital of France is Paris."
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 24,
+    "completion_tokens": 8,
+    "total_tokens": 32
+  },
+  "cost_usd": 0.0000056
+}</code></pre>
+
+    <h2 id="streaming">Streaming</h2>
+    <p>Set <code>"stream": true</code> to receive Server-Sent Events:</p>
+    <pre><code>curl https://cocapn.ai/v1/chat/completions \
+  -H "Authorization: Bearer cpn_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "deepseek-chat",
+    "messages": [{"role": "user", "content": "Tell me a story"}],
+    "stream": true
+  }'
+
+# Returns:
+data: {"choices":[{"delta":{"content":"Once"},"index":0}]}
+data: {"choices":[{"delta":{"content":" upon"},"index":0}]}
+data: {"choices":[{"delta":{"content":" a time..."}],"index":0}]}
+data: [DONE]</code></pre>
+
+    <h2 id="models-api">List Models</h2>
+    <div class="endpoint">
+        <span class="method get">GET</span> <code>https://cocapn.ai/v1/models</code>
+    </div>
+    <pre><code>curl -H "Authorization: Bearer cpn_your_key_here" https://cocapn.ai/v1/models
+
+{
+  "object": "list",
+  "data": [
+    {"id": "deepseek-chat", "provider": "deepseek", "context": 128000, ...},
+    {"id": "gpt-4o", "provider": "openai", "context": 128000, ...},
+    ...
+  ]
+}</code></pre>
+
+    <h2 id="usage">Usage Stats</h2>
+    <div class="endpoint">
+        <span class="method get">GET</span> <code>https://cocapn.ai/v1/usage</code>
+    </div>
+    <pre><code>{
+  "period": "2026-04",
+  "total_requests": 1247,
+  "total_tokens_in": 2450000,
+  "total_tokens_out": 890000,
+  "total_cost_usd": 4.32,
+  "by_model": {
+    "deepseek-chat": {"requests": 980, "tokens_in": 1800000, "tokens_out": 600000, "cost": 1.20},
+    "gpt-4o": {"requests": 267, "tokens_in": 650000, "tokens_out": 290000, "cost": 3.12}
+  }
+}</code></pre>
+
+    <h2 id="byok">Bring Your Own Keys</h2>
+    <p>Add your own provider API keys in the dashboard. Your keys are used first, server keys as fallback. Your keys never leave our servers (stored in Cloudflare Secrets Store).</p>
+
+    <div class="grid">
+        <div class="card">
+            <h4>🔑 Why BYOK?</h4>
+            <p>Use your existing credits. No markup on your own keys. Full transparency on costs.</p>
+        </div>
+        <div class="card">
+            <h4>🛡️ Security</h4>
+            <p>Keys stored in Cloudflare Secrets Store, never in Worker code or KV. Encrypted at rest.</p>
+        </div>
+    </div>
+
+    <h3>Setting Provider Keys</h3>
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>https://cocapn.ai/api/settings/keys</code>
+    </div>
+    <pre><code>{
+  "provider": "anthropic",
+  "api_key": "sk-ant-your-key"
+}</code></pre>
+
+    <h2 id="routing">Smart Routing</h2>
+    <p>cocapn.ai automatically routes to the cheapest capable model for your task. This can reduce costs by 60-97%.</p>
+
+    <table>
+        <tr><th>Task Type</th><th>Default (GPT-4o)</th><th>Routed</th><th>Savings</th></tr>
+        <tr><td>Simple chat</td><td>$2.50/$10.00</td><td>$0.14/$0.28</td><td style="color:var(--green)">94-97%</td></tr>
+        <tr><td>Code review</td><td>$2.50/$10.00</td><td>$0.80/$4.00</td><td style="color:var(--green)">60-68%</td></tr>
+        <tr><td>Math/reasoning</td><td>$2.50/$10.00</td><td>$0.55/$2.19</td><td style="color:var(--green)">78-82%</td></tr>
+        <tr><td>Analysis</td><td>$2.50/$10.00</td><td>$0.20/$0.60</td><td style="color:var(--green)">92-94%</td></tr>
+    </table>
+
+    <h2 id="sdk-node">Node.js SDK</h2>
+    <pre><code>npm install cocapn</code></pre>
+    <pre><code>import { chat, chatStream, models, usage } from 'cocapn';
+
+// Basic chat
+const response = await chat({
+  apiKey: 'cpn_your_key',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  model: 'deepseek-chat'
+});
+console.log(response.content);
+console.log(response.costUsd);
+
+// Streaming
+for await (const chunk of chatStream({
+  apiKey: 'cpn_your_key',
+  messages: [{ role: 'user', content: 'Tell me a story' }]
+})) {
+  process.stdout.write(chunk.content);
+}
+
+// List models
+const modelList = await models({ apiKey: 'cpn_your_key' });
+
+// Usage stats
+const stats = await usage({ apiKey: 'cpn_your_key' });</code></pre>
+
+    <h2 id="sdk-python">Python SDK</h2>
+    <pre><code>pip install cocapn</code></pre>
+    <pre><code>from cocapn import Client
+
+client = Client(api_key="cpn_your_key")
+
+# Basic chat
+response = client.chat(
+    messages=[{"role": "user", "content": "Hello!"}],
+    model="deepseek-chat"
+)
+print(response.content)
+print(response.cost_usd)
+
+# Streaming
+for chunk in client.chat_stream(
+    messages=[{"role": "user", "content": "Tell me a story"}]
+):
+    print(chunk.content, end="", flush=True)
+
+# List models
+models = client.models()
+
+# Usage
+stats = client.usage()</code></pre>
+
+    <h2 id="sdk-go">Go SDK</h2>
+    <pre><code>go get cocapn-go</code></pre>
+    <pre><code>package main
+
+import (
+    "fmt"
+    cocapn "cocapn-go"
+)
+
+func main() {
+    client := cocapn.NewClient(
+        cocapn.WithAPIKey("cpn_your_key"),
+    )
+
+    resp, err := client.Chat(
+        cocapn.WithModel("deepseek-chat"),
+        cocapn.WithMessages(
+            cocapn.UserMessage("Hello!"),
+        ),
+    )
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println(resp.Content)
+    fmt.Printf("Cost: $%.6f\n", resp.CostUSD)
+}</code></pre>
+
+    <h2 id="pricing">Pricing</h2>
+    <div class="grid">
+        <div class="card" style="border-color: var(--green)">
+            <h4 style="color:var(--green)">Free</h4>
+            <p>$0/mo — 100K tokens/day, 3 models, community support</p>
+        </div>
+        <div class="card">
+            <h4>Builder</h4>
+            <p>$9/mo — 1M tokens/day, 8 models, BYOK, priority queue</p>
+        </div>
+        <div class="card">
+            <h4>Team</h4>
+            <p>$29/mo — 5M tokens/day, all models, team dashboard, API</p>
+        </div>
+        <div class="card" style="border-color: var(--accent)">
+            <h4 style="color:var(--accent)">Enterprise</h4>
+            <p>Custom — unlimited, dedicated support, SLA, on-prem option</p>
+        </div>
+    </div>
+
+    <h2 id="errors">Error Codes</h2>
+    <table>
+        <tr><th>Code</th><th>HTTP</th><th>Description</th></tr>
+        <tr><td><code>auth_failed</code></td><td>401</td><td>Invalid or missing API key</td></tr>
+        <tr><td><code>insufficient_credits</code></td><td>402</td><td>Account out of credits</td></tr>
+        <tr><td><code>rate_limited</code></td><td>429</td><td>Too many requests (see rate limits)</td></tr>
+        <tr><td><code>model_unavailable</code></td><td>404</td><td>Requested model not found or disabled for tier</td></tr>
+        <tr><td><code>invalid_request</code></td><td>400</td><td>Malformed request body</td></tr>
+        <tr><td><code>provider_error</code></td><td>502</td><td>Upstream provider returned an error</td></tr>
+        <tr><td><code>timeout</code></td><td>504</td><td>Provider request timed out</td></tr>
+    </table>
+
+    <h2 id="rate-limits">Rate Limits</h2>
+    <table>
+        <tr><th>Tier</th><th>Requests/min</th><th>Tokens/day</th><th>Concurrent</th></tr>
+        <tr><td>Free</td><td>10</td><td>100K</td><td>1</td></tr>
+        <tr><td>Builder</td><td>30</td><td>1M</td><td>3</td></tr>
+        <tr><td>Team</td><td>100</td><td>5M</td><td>10</td></tr>
+        <tr><td>Enterprise</td><td>Custom</td><td>Unlimited</td><td>Custom</td></tr>
+    </table>
+
+    <p style="margin-top: 3rem; color: var(--text-dim); font-size: 0.85rem;">
+        © 2026 cocapn.ai — Built on Cloudflare Workers. OpenAI-compatible API.
+    </p>
+</div>
+
+<script>
+// Smooth scroll and active sidebar link
+document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(link.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+    });
+});
+
+// Highlight active section on scroll
+const sections = document.querySelectorAll('h2[id]');
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+        if (window.scrollY >= section.offsetTop - 100) {
+            current = section.id;
+        }
+    });
+    sidebarLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
+    });
+});
+</script>
+</body>
+</html>

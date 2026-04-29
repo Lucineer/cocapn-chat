@@ -1,0 +1,168 @@
+# Edge AI — Run AI On-Device
+
+cocapn.ai edge enables running AI models directly on NVIDIA Jetson devices — no cloud API calls, no latency, no per-token costs.
+
+## Quick Start
+
+```bash
+# Start the edge gateway
+python3 edge-gateway.py --port 11435
+
+# Use with any OpenAI-compatible client
+from openai import OpenAI
+client = OpenAI(base_url="http://jetson:11435/v1", api_key="local")
+
+# Chat
+resp = client.chat.completions.create(
+    model="deepseek-r1:1.5b",
+    messages=[{"role": "user", "content": "What is quantum computing?"}]
+)
+
+# Embeddings
+resp = client.embeddings.create(
+    model="nomic-embed-text",
+    input=["Hello world"]
+)
+```
+
+## Supported Hardware
+
+| Device | RAM | Tested Models | Status |
+|--------|-----|--------------|--------|
+| Jetson Orin Nano 8GB | 8GB | deepseek-r1:1.5b, moondream, nomic-embed-text, phi3:mini | ✅ Verified |
+| Jetson Orin NX 16GB | 16GB | qwen3.5:2b, nemotron-3-nano:4b | 🔄 Pending |
+| Jetson AGX Orin 64GB | 64GB | All tested models | 🔄 Pending |
+
+## Benchmarks (Jetson Orin Nano 8GB)
+
+### Inference Speed
+
+| Model | Parameters | Size | Speed | Type |
+|-------|-----------|------|-------|------|
+| nomic-embed-text | 137M | 274MB | **15,922 t/s** | Embedding |
+| moondream | 1.6B | 1.7GB | **79.5 t/s** | Vision |
+| deepseek-r1:1.5b | 1.5B | 1.1GB | **61.3 t/s** | Reasoning |
+| phi3:mini | 3.8B | 2.3GB | TBD | General |
+
+### TensorRT (Compiled Models)
+
+| Architecture | Throughput | Latency |
+|-------------|-----------|---------|
+| MLP 64→32→16 (2.6K params) | 17,398 QPS | 0.037ms |
+| MLP 512→256→128 (164K params) | 17,630 QPS | 0.047ms |
+| MLP 1024→512→256 (656K params) | 16,650 QPS | 0.064ms |
+
+### Thermal Performance
+
+| Metric | Value |
+|--------|-------|
+| Idle GPU temp | 48°C |
+| Peak GPU temp (sustained load) | 51°C |
+| Thermal throttle threshold | 80°C |
+| **Thermal headroom** | **29°C** ✅ |
+
+## API Reference
+
+### POST /v1/chat/completions
+
+OpenAI-compatible chat completions with streaming support.
+
+```json
+{
+  "model": "deepseek-r1:1.5b",
+  "messages": [
+    {"role": "system", "content": "You are helpful."},
+    {"role": "user", "content": "Explain RAG"}
+  ],
+  "stream": true
+}
+```
+
+### POST /v1/embeddings
+
+OpenAI-compatible embeddings. Uses nomic-embed-text (768-dim).
+
+```json
+{
+  "model": "nomic-embed-text",
+  "input": ["Hello world", "Jetson GPU"]
+}
+```
+
+### POST /v1/rag/query
+
+Retrieval-Augmented Generation — search local documents, then generate an answer.
+
+```json
+{
+  "query": "What are the Jetson GPU lessons?",
+  "model": "deepseek-r1:1.5b",
+  "top_k": 5
+}
+```
+
+### GET /v1/stats
+
+Real-time system monitoring.
+
+```json
+{
+  "device": "Jetson Orin Nano 8GB",
+  "gpu_temp_c": 48.2,
+  "cpu_temp_c": 47.1,
+  "ram_available_mb": 2851,
+  "cma_free_mb": 20,
+  "usage": {"total_requests": 42, "total_prompt_tokens": 15000}
+}
+```
+
+### GET /v1/health
+
+Health check endpoint.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│              edge-gateway.py                 │
+│           (OpenAI-compatible API)           │
+├──────────┬──────────┬───────────┬───────────┤
+│  /chat   │ /embed   │  /rag     │  /stats   │
+├──────────┴──────────┴───────────┴───────────┤
+│              Ollama (local)                  │
+│         CUDA 12.6 / TensorRT 10.3           │
+├─────────────────────────────────────────────┤
+│           Jetson Orin Nano 8GB              │
+│      1024 CUDA cores · 8GB unified RAM      │
+└─────────────────────────────────────────────┘
+```
+
+## CMA Configuration
+
+The CMA (Contiguous Memory Allocator) is the GPU's dedicated memory pool. Default is 256MB, which limits models to ~1.5B parameters.
+
+**To support larger models, increase CMA:**
+```bash
+# Edit kernel boot args (requires root)
+sudo vi /etc/kernel/cmdline-extra
+# Add: video=tegrafb mem=2G
+sudo reboot
+```
+
+| CMA Size | Max Model | Notes |
+|----------|-----------|-------|
+| 256MB (default) | ~1.5B params | deepseek-r1, moondream |
+| 512MB | ~2B params | qwen3.5:2b |
+| 1GB | ~3B params | phi3:mini, nemotron-3-nano |
+| 2GB | ~4B params | Qwen3.5-4B |
+
+## Tools
+
+| Tool | Description |
+|------|-------------|
+| `edge-gateway.py` | Unified API server (chat + embed + RAG) |
+| `edge-chat.py` | Local chat web UI |
+| `edge-rag.py` | Document indexing + retrieval |
+| `jetson-monitor.py` | System monitoring + stress testing |
+| `gpu-bench.py` | GPU benchmark suite (Ollama + CUDA + thermal) |
+| `tensorrt-bench.py` | TensorRT ONNX→TRT benchmarks |
